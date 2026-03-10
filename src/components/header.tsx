@@ -49,7 +49,7 @@ const TopBar = () => {
     <div className="flex flex-row gap-8 w-full h-20 bg-transparent items-center px-10" 
         style={{
           // backgroundSize: "cover",
-          backgroundImage: "url(/background-escuro.jpg)",
+          backgroundImage: "url(/oficial-background.jpeg)",
         }}>
       <Link href="/" className="flex flex-row items-center  w-70 p-2 text-2xl text-white font-bold">
         <img className="w-40 h-16"src="/images/logo-stem.png" alt="STEMIME LOGO"/>
