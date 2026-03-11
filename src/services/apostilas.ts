@@ -12,7 +12,6 @@ export type FileRow = {
   size_bytes: number;
   is_public: boolean;
   created_at: string;
-
   subject: Subject | null;
   bucket?: string;
 };
@@ -119,4 +118,35 @@ export async function deleteApostila(
   }
 
   return { data: { id: file.id }, error: null };
+}
+
+export async function updateApostilaMetadata(params: {
+  id: string;
+  title?: string | null;
+  description?: string | null;
+  is_public: boolean;
+  subject?: Subject | null;
+}) {
+  const { id, title, description, is_public, subject } = params;
+
+  if (
+    subject != null &&
+    subject !== "matematica" &&
+    subject !== "fisica" &&
+    subject !== "quimica"
+  ) {
+    return { data: null, error: { message: "Matéria inválida." } as any };
+  }
+
+  return supabase
+    .from("files")
+    .update({
+      title: title ?? null,
+      description: description ?? null,
+      is_public,
+      subject: subject ?? null,
+    })
+    .eq("id", id)
+    .select()
+    .single();
 }
