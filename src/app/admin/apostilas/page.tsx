@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isCurrentUserAdmin } from "@/src/services/auth";
 import {
@@ -11,6 +11,7 @@ import {
   deleteApostila,
   FileRow,
   Subject,
+  updateApostilaMetadata,
 } from "@/src/services/apostilas";
 
 function subjectLabel(s: Subject | null | undefined) {
@@ -37,10 +38,11 @@ function getTitle(f: FileRow) {
 
 export default function AdminApostilasPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [checking, setChecking] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -54,6 +56,7 @@ export default function AdminApostilasPage() {
   const [isPublic, setIsPublic] = useState(true);
   const [subject, setSubject] = useState<Subject>("matematica");
   const [file, setFile] = useState<File | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [stars, setStars] = useState<
     {
@@ -82,6 +85,38 @@ export default function AdminApostilasPage() {
   const total = files.length;
   const totalPublic = files.filter((f) => f.is_public).length;
   const totalPrivate = total - totalPublic;
+
+  function resetForm() {
+    setEditingId(null);
+    setTitle("");
+    setDescription("");
+    setIsPublic(true);
+    setSubject("matematica");
+    setFile(null);
+    setError(null);
+    setSuccess(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
+  function startEdit(f: FileRow) {
+    setEditingId(f.id);
+    setTitle(f.title ?? "");
+    setDescription(f.description ?? "");
+    setIsPublic(f.is_public);
+    setSubject((f.subject ?? "matematica") as Subject);
+    setFile(null);
+    setError(null);
+    setSuccess(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   async function refresh() {
     setLoading(true);
@@ -115,16 +150,40 @@ export default function AdminApostilasPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
-  async function upload() {
+  async function submitForm() {
     setError(null);
     setSuccess(null);
+
+    if (editingId) {
+      setSubmitting(true);
+
+      const { error } = await updateApostilaMetadata({
+        id: editingId,
+        title: title.trim() || null,
+        description: description.trim() || null,
+        is_public: isPublic,
+        subject,
+      });
+
+      setSubmitting(false);
+
+      if (error) {
+        setError(error.message ?? "Falha ao atualizar apostila.");
+        return;
+      }
+
+      setSuccess("Apostila atualizada com sucesso.");
+      resetForm();
+      await refresh();
+      return;
+    }
 
     if (!file) {
       setError("Selecione um PDF.");
       return;
     }
 
-    setUploading(true);
+    setSubmitting(true);
 
     const { error } = await adminUploadPdf({
       file,
@@ -134,20 +193,15 @@ export default function AdminApostilasPage() {
       subject,
     });
 
-    setUploading(false);
+    setSubmitting(false);
 
     if (error) {
-      setError(error.message);
+      setError(error.message ?? "Falha ao enviar arquivo.");
       return;
     }
 
     setSuccess("Upload concluído!");
-    setTitle("");
-    setDescription("");
-    setIsPublic(true);
-    setSubject("matematica");
-    setFile(null);
-
+    resetForm();
     await refresh();
   }
 
@@ -188,6 +242,10 @@ export default function AdminApostilasPage() {
     if (error) {
       setError(error.message ?? "Falha ao excluir arquivo.");
       return;
+    }
+
+    if (editingId === f.id) {
+      resetForm();
     }
 
     setSuccess("Apostila excluída com sucesso.");
@@ -240,8 +298,9 @@ export default function AdminApostilasPage() {
               </h1>
 
               <p className="mt-2 text-white/70 max-w-2xl leading-relaxed">
-                Upload de PDFs com título, descrição, matéria, visibilidade e
-                exclusão apenas no painel administrativo.
+                Gerencie as apostilas do site. Você pode enviar novos PDFs,
+                editar título, descrição, matéria e visibilidade, ou excluir
+                arquivos do painel administrativo.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-3">
@@ -305,17 +364,30 @@ export default function AdminApostilasPage() {
             <div className="relative">
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div>
-                  <div className="text-xl font-extrabold">Upload de PDF</div>
+                  <div className="text-xl font-extrabold">
+                    {editingId ? "Editar apostila" : "Upload de PDF"}
+                  </div>
                   <div className="mt-1 text-sm text-white/70">
-                    Defina matéria, título, descrição e se o arquivo ficará
-                    público.
+                    {editingId
+                      ? "Altere apenas os metadados da apostila. Se o PDF estiver errado, exclua e envie novamente."
+                      : "Defina matéria, título, descrição e se o arquivo ficará público."}
                   </div>
                 </div>
 
                 <div className="text-xs text-white/60">
-                  Máximo 20MB · Apenas PDF
+                  {editingId
+                    ? "Edição sem troca de PDF"
+                    : "Máximo 20MB · Apenas PDF"}
                 </div>
               </div>
+
+              {editingId && (
+                <div className="mt-5 rounded-2xl border border-orange-400/25 bg-orange-400/10 p-4 text-sm text-orange-100">
+                  Você está editando uma apostila existente. Nesta tela, o PDF
+                  não é alterado. Para trocar o arquivo, exclua a apostila e
+                  faça um novo upload.
+                </div>
+              )}
 
               <div className="mt-6 grid gap-4">
                 <div className="grid gap-4 md:grid-cols-2">
@@ -357,50 +429,60 @@ export default function AdminApostilasPage() {
                   />
                 </div>
 
-                <div className="grid gap-2">
-                  <label className="text-sm text-white/80">PDF</label>
+                {!editingId && (
+                  <div className="grid gap-2">
+                    <label className="text-sm text-white/80">PDF</label>
 
-                  <input
-                    id="pdfInput"
-                    type="file"
-                    accept="application/pdf"
-                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    className="hidden"
-                  />
+                    <input
+                      ref={fileInputRef}
+                      id="pdfInput"
+                      type="file"
+                      accept="application/pdf"
+                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                      className="hidden"
+                    />
 
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <label
-                      htmlFor="pdfInput"
-                      className="cursor-pointer rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm hover:border-white/30 hover:bg-white/10 transition"
-                    >
-                      Selecionar PDF
-                    </label>
-
-                    {file ? (
-                      <div className="text-sm text-white/80">
-                        <span className="font-semibold">{file.name}</span>
-                        <span className="text-white/60">
-                          {" "}
-                          · {(file.size / (1024 * 1024)).toFixed(2)} MB
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-white/60">
-                        Nenhum arquivo selecionado
-                      </div>
-                    )}
-
-                    {file && (
-                      <button
-                        type="button"
-                        onClick={() => setFile(null)}
-                        className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-100 hover:border-red-500/60 transition"
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <label
+                        htmlFor="pdfInput"
+                        className="cursor-pointer rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm hover:border-white/30 hover:bg-white/10 transition"
                       >
-                        Remover
-                      </button>
-                    )}
-                  </div>
+                        Selecionar PDF
+                      </label>
 
+                      {file ? (
+                        <div className="text-sm text-white/80">
+                          <span className="font-semibold">{file.name}</span>
+                          <span className="text-white/60">
+                            {" "}
+                            · {(file.size / (1024 * 1024)).toFixed(2)} MB
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-white/60">
+                          Nenhum arquivo selecionado
+                        </div>
+                      )}
+
+                      {file && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFile(null);
+                            if (fileInputRef.current) {
+                              fileInputRef.current.value = "";
+                            }
+                          }}
+                          className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-100 hover:border-red-500/60 transition"
+                        >
+                          Remover
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid gap-2">
                   <label className="mt-2 inline-flex items-center gap-2 text-sm text-white/80">
                     <input
                       type="checkbox"
@@ -414,27 +496,25 @@ export default function AdminApostilasPage() {
 
                 <div className="flex flex-wrap gap-3">
                   <button
-                    onClick={upload}
-                    disabled={!file || uploading}
+                    onClick={submitForm}
+                    disabled={submitting || (!editingId && !file)}
                     className="rounded-xl bg-white text-black font-semibold px-5 py-3 hover:opacity-90 transition disabled:opacity-60"
                   >
-                    {uploading ? "Enviando..." : "Enviar"}
+                    {submitting
+                      ? editingId
+                        ? "Salvando..."
+                        : "Enviando..."
+                      : editingId
+                        ? "Salvar alterações"
+                        : "Enviar"}
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setTitle("");
-                      setDescription("");
-                      setIsPublic(true);
-                      setSubject("matematica");
-                      setFile(null);
-                      setError(null);
-                      setSuccess(null);
-                    }}
+                    onClick={resetForm}
                     className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm hover:border-white/30 hover:bg-white/10 transition"
                   >
-                    Limpar
+                    {editingId ? "Cancelar edição" : "Limpar"}
                   </button>
                 </div>
               </div>
@@ -479,6 +559,7 @@ export default function AdminApostilasPage() {
                 {files.map((f) => {
                   const busy = downloadingId === f.id;
                   const deleting = deletingId === f.id;
+                  const editingThis = editingId === f.id;
 
                   return (
                     <div
@@ -508,11 +589,21 @@ export default function AdminApostilasPage() {
                             >
                               {f.is_public ? "Público" : "Privado"}
                             </span>
+
+                            {editingThis && (
+                              <span className="rounded-full px-3 py-1 text-xs font-bold border border-orange-400/40 bg-orange-400/10 text-orange-200">
+                                Em edição
+                              </span>
+                            )}
                           </div>
 
                           <div className="mt-2 text-xs text-white/60">
                             {formatMB(f.size_bytes)} ·{" "}
                             {formatDatePt(f.created_at)}
+                          </div>
+
+                          <div className="mt-1 text-xs text-white/45">
+                            Arquivo: {f.original_name}
                           </div>
 
                           {f.description && (
@@ -525,15 +616,28 @@ export default function AdminApostilasPage() {
                         <div className="flex flex-wrap gap-2 md:justify-end">
                           <button
                             onClick={() => adminDownload(f)}
-                            disabled={busy || deleting}
+                            disabled={busy || deleting || submitting}
                             className="rounded-xl bg-white text-black font-semibold px-4 py-2 text-sm hover:opacity-90 transition disabled:opacity-60"
                           >
                             {busy ? "Gerando..." : "Baixar"}
                           </button>
 
                           <button
+                            onClick={() => startEdit(f)}
+                            disabled={busy || deleting || submitting}
+                            className={[
+                              "rounded-xl px-4 py-2 text-sm font-semibold transition disabled:opacity-60",
+                              editingThis
+                                ? "bg-orange-500 text-black"
+                                : "border border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/10",
+                            ].join(" ")}
+                          >
+                            {editingThis ? "Editando" : "Editar"}
+                          </button>
+
+                          <button
                             onClick={() => removeFile(f)}
-                            disabled={busy || deleting}
+                            disabled={busy || deleting || submitting}
                             className="rounded-xl bg-red-600 text-white font-semibold px-4 py-2 text-sm hover:bg-red-700 transition disabled:opacity-60"
                           >
                             {deleting ? "Excluindo..." : "Excluir"}
