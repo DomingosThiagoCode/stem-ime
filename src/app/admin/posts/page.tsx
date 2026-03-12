@@ -6,12 +6,13 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/src/services/supabaseClient";
 import { isCurrentUserAdmin } from "@/src/services/auth";
 import {
-  PostRow,
   adminCreatePost,
   adminDeletePost,
   adminListAllPosts,
   adminUpdatePost,
+  uploadPostCover,
 } from "@/src/services/posts";
+import type { PostRow } from "@/src/@types/posts";
 
 function formatDatePt(dateLike: string) {
   const d = new Date(dateLike);
@@ -25,41 +26,6 @@ function excerpt(text: string, n = 160) {
   return t.slice(0, n) + "…";
 }
 
-async function uploadCoverToSupabase(file: File) {
-  if (!file.type.startsWith("image/")) {
-    return {
-      data: null,
-      error: { message: "Envie uma imagem (PNG/JPG/WebP)." } as any,
-    };
-  }
-
-  // limite pra não pesar o site
-  if (file.size > 3 * 1024 * 1024) {
-    return { data: null, error: { message: "Máx. 3MB." } as any };
-  }
-
-  const safeName = file.name.replaceAll(" ", "_");
-  const objectPath = `covers/${new Date().getFullYear()}/${Date.now()}_${safeName}`;
-
-  const upload = await supabase.storage
-    .from("post-covers")
-    .upload(objectPath, file, {
-      contentType: file.type,
-      upsert: false,
-    });
-
-  if (upload.error) return upload;
-
-  const { data } = supabase.storage
-    .from("post-covers")
-    .getPublicUrl(objectPath);
-
-  return {
-    data: { publicUrl: data.publicUrl, objectPath },
-    error: null as any,
-  };
-}
-
 export default function AdminPostsPage() {
   const router = useRouter();
 
@@ -69,7 +35,6 @@ export default function AdminPostsPage() {
 
   const [posts, setPosts] = useState<PostRow[]>([]);
 
-  // form (criar/editar)
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -81,7 +46,6 @@ export default function AdminPostsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // estrelas (vibe do site)
   const [stars, setStars] = useState<
     {
       id: number;
@@ -136,7 +100,7 @@ export default function AdminPostsPage() {
       return;
     }
 
-    setPosts((data as any) ?? []);
+    setPosts((data as PostRow[]) ?? []);
     setLoading(false);
   }
 
@@ -145,7 +109,6 @@ export default function AdminPostsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checking]);
 
-  // revoga URL de preview
   useEffect(() => {
     return () => {
       if (coverPreview?.startsWith("blob:")) URL.revokeObjectURL(coverPreview);
@@ -188,25 +151,33 @@ export default function AdminPostsPage() {
 
     setBusyId(editingId ? `save:${editingId}` : "create");
 
-    // capa: se escolheu arquivo novo, faz upload e pega URL pública
     let coverUrl: string | null =
       (editingId
         ? posts.find((x) => x.id === editingId)?.cover_image_url
         : null) ?? null;
 
+    let coverPath: string | null =
+      (editingId
+        ? posts.find((x) => x.id === editingId)?.cover_image_path
+        : null) ?? null;
+
     if (coverFile) {
-      const up = await uploadCoverToSupabase(coverFile);
+      const up = await uploadPostCover(coverFile);
+
       if (up.error) {
         setBusyId(null);
         setError(up.error.message);
         return;
       }
-      if (up.error || !up.data?.publicUrl) {
+
+      if (!up.data?.publicUrl || !up.data?.objectPath) {
         setBusyId(null);
-        setError(up.error?.message ?? "Falha ao enviar a capa.");
+        setError("Falha ao enviar a capa.");
         return;
       }
+
       coverUrl = up.data.publicUrl;
+      coverPath = up.data.objectPath;
     }
 
     if (!editingId) {
@@ -214,6 +185,7 @@ export default function AdminPostsPage() {
         title: t,
         content: c,
         cover_image_url: coverUrl,
+        cover_image_path: coverPath,
         is_published: isPublished,
       });
 
@@ -230,12 +202,24 @@ export default function AdminPostsPage() {
       return;
     }
 
-    const { error } = await adminUpdatePost(editingId, {
+    const payload: Partial<{
+      title: string;
+      content: string;
+      cover_image_url: string | null;
+      cover_image_path: string | null;
+      is_published: boolean;
+    }> = {
       title: t,
       content: c,
-      cover_image_url: coverUrl,
       is_published: isPublished,
-    });
+    };
+
+    if (coverFile) {
+      payload.cover_image_url = coverUrl;
+      payload.cover_image_path = coverPath;
+    }
+
+    const { error } = await adminUpdatePost(editingId, payload);
 
     setBusyId(null);
 
@@ -307,11 +291,9 @@ export default function AdminPostsPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#040607] text-white">
-      {/* Fundo */}
       <div className="absolute inset-0 bg-[#040607]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(79,163,255,0.18),transparent_55%),radial-gradient(circle_at_85%_25%,rgba(255,140,0,0.14),transparent_55%),radial-gradient(circle_at_50%_85%,rgba(255,255,255,0.05),transparent_60%)]" />
 
-      {/* Estrelas */}
       <div className="absolute inset-0 opacity-70">
         {stars.map((s) => (
           <span
@@ -330,7 +312,6 @@ export default function AdminPostsPage() {
       </div>
 
       <div className="relative z-10">
-        {/* Header */}
         <div className="max-w-6xl mx-auto px-6 pt-12 pb-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
@@ -376,7 +357,6 @@ export default function AdminPostsPage() {
           </div>
         </div>
 
-        {/* Faixa azul */}
         <div className="h-3 bg-[#4fa3ff]" />
 
         <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
@@ -395,7 +375,6 @@ export default function AdminPostsPage() {
             </div>
           )}
 
-          {/* Form Criar/Editar */}
           <form
             onSubmit={handleSubmit}
             className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/35 backdrop-blur-xl p-6 shadow-sm"
@@ -426,7 +405,6 @@ export default function AdminPostsPage() {
               </div>
 
               <div className="mt-6 grid gap-4">
-                {/* Capa */}
                 <div className="grid gap-2">
                   <label className="text-sm text-white/80">
                     Capa do post (opcional)
@@ -442,24 +420,26 @@ export default function AdminPostsPage() {
                         const f = e.target.files?.[0] ?? null;
                         setCoverFile(f);
 
-                        if (coverPreview?.startsWith("blob:"))
+                        if (coverPreview?.startsWith("blob:")) {
                           URL.revokeObjectURL(coverPreview);
+                        }
 
-                        if (f) setCoverPreview(URL.createObjectURL(f));
-                        else
+                        if (f) {
+                          setCoverPreview(URL.createObjectURL(f));
+                        } else {
                           setCoverPreview(
                             editingId
                               ? (posts.find((x) => x.id === editingId)
                                   ?.cover_image_url ?? null)
                               : null,
                           );
+                        }
                       }}
                     />
 
                     <label
                       htmlFor="coverInput"
-                      className="cursor-pointer rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm
-                                 hover:border-white/30 hover:bg-white/10 transition self-start"
+                      className="cursor-pointer rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm hover:border-white/30 hover:bg-white/10 transition self-start"
                     >
                       Selecionar imagem
                     </label>
@@ -472,8 +452,9 @@ export default function AdminPostsPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (coverPreview?.startsWith("blob:"))
+                          if (coverPreview?.startsWith("blob:")) {
                             URL.revokeObjectURL(coverPreview);
+                          }
                           setCoverFile(null);
                           setCoverPreview(null);
                         }}
@@ -487,7 +468,6 @@ export default function AdminPostsPage() {
                   <div className="mt-2 rounded-2xl border border-white/10 bg-black/30 overflow-hidden">
                     <div className="relative w-full aspect-video bg-black/20">
                       {coverPreview ? (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={coverPreview}
                           alt="Prévia da capa"
@@ -506,8 +486,7 @@ export default function AdminPostsPage() {
                   <div className="grid gap-2">
                     <label className="text-sm text-white/80">Título</label>
                     <input
-                      className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none
-                                 focus:border-[#4fa3ff] focus:ring-2 focus:ring-[#4fa3ff]/20"
+                      className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-[#4fa3ff] focus:ring-2 focus:ring-[#4fa3ff]/20"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="Ex.: Mulheres na Ciência — Shannon Walker"
@@ -563,8 +542,7 @@ export default function AdminPostsPage() {
                 <div className="grid gap-2">
                   <label className="text-sm text-white/80">Conteúdo</label>
                   <textarea
-                    className="w-full min-h-50 rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none
-                               focus:border-[#4fa3ff] focus:ring-2 focus:ring-[#4fa3ff]/20"
+                    className="w-full min-h-50 rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-[#4fa3ff] focus:ring-2 focus:ring-[#4fa3ff]/20"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Escreva o conteúdo do post..."
@@ -575,7 +553,6 @@ export default function AdminPostsPage() {
             </div>
           </form>
 
-          {/* Lista de Posts */}
           <div className="space-y-4">
             <div className="flex items-end justify-between gap-4 flex-wrap">
               <div>
@@ -620,7 +597,6 @@ export default function AdminPostsPage() {
                         <div className="flex gap-4 min-w-0">
                           <div className="h-20 w-28 rounded-xl overflow-hidden border border-white/10 bg-black/20 shrink-0">
                             {p.cover_image_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={p.cover_image_url}
                                 alt={p.title}
@@ -707,7 +683,6 @@ export default function AdminPostsPage() {
           </div>
         </div>
 
-        {/* Faixa laranja */}
         <div className="h-2 bg-orange-400" />
       </div>
     </div>
