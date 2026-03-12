@@ -1,4 +1,3 @@
-import { Postagem } from "./Home/Postagem";
 import ComponentCarousel from "./Home/Carrosel/carousel";
 
 import { Birthstone } from "next/font/google";
@@ -64,7 +63,7 @@ const Index = () => {
         className="flex w-full flex-col items-center gap-10"
         style={{
           backgroundSize: "cover",
-          backgroundImage: "url(/Background.jpg)",
+          backgroundImage: "url(/oficial-background.jpeg)",
         }}
       >
         <div
