@@ -37,7 +37,6 @@ export default function ApostilasPage() {
   const [files, setFiles] = useState<FileRow[]>([]);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  // ✅ estados do filtro (usados pelo componente)
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recent");
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
@@ -54,29 +53,29 @@ export default function ApostilasPage() {
         return;
       }
 
-      setFiles((data as any) ?? []);
+      setFiles((data as FileRow[]) ?? []);
       setLoading(false);
     }
+
     run();
   }, []);
 
-  // ✅ aplica filtros + ordenação
   const shownFiles = useMemo(() => {
     const q = query.trim().toLowerCase();
     const selected = new Set(selectedSubjects);
 
     const filtered = files.filter((f) => {
-      // matéria
       if (selected.size > 0) {
         if (!f.subject) return false;
         if (!selected.has(f.subject)) return false;
       }
 
-      // busca
       if (!q) return true;
+
       const t = getTitle(f).toLowerCase();
       const d = (f.description ?? "").toLowerCase();
       const n = (f.original_name ?? "").toLowerCase();
+
       return t.includes(q) || d.includes(q) || n.includes(q);
     });
 
@@ -86,10 +85,11 @@ export default function ApostilasPage() {
           sensitivity: "base",
         });
       }
+
       if (sort === "size") {
         return (b.size_bytes ?? 0) - (a.size_bytes ?? 0);
       }
-      // recent
+
       return (
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
@@ -114,26 +114,29 @@ export default function ApostilasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#040607]">
-      {/* HERO */}
+    <div className="flex min-h-full w-full flex-col bg-white text-[#0b1220]">
       <section
-        className="relative overflow-hidden "
+        className="relative w-full overflow-hidden bg-[#040607] text-white"
         style={{
-          // backgroundSize: "cover",
           backgroundImage: "url(/background-escuro.jpg)",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
         }}
       >
-        {/* <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(79,163,255,0.22),transparent_55%),radial-gradient(circle_at_85%_20%,rgba(255,140,0,0.18),transparent_55%),radial-gradient(circle_at_50%_80%,rgba(255,255,255,0.06),transparent_60%)]" /> */}
-        <div className="relative max-w-7xl mx-auto px-6 pt-14 pb-12">
-          <div className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80">
+        <div className="absolute inset-0 bg-[#040607]/45" />
+
+        <div className="relative mx-auto w-full max-w-7xl px-4 pb-12 pt-10 sm:px-6 sm:pt-14 lg:px-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80">
             <span className="inline-block h-2 w-2 rounded-full bg-orange-400" />
             Biblioteca STEMIME
           </div>
 
-          <h1 className="mt-4 text-4xl md:text-5xl font-extrabold tracking-tight text-white">
+          <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
             Apostilas
           </h1>
-          <p className="mt-2 max-w-2xl text-white/70 leading-relaxed">
+
+          <p className="mt-2 max-w-2xl leading-relaxed text-white/70">
             Filtre por matéria, busque pelo conteúdo e baixe os materiais
             publicados.
           </p>
@@ -143,6 +146,7 @@ export default function ApostilasPage() {
               <div className="text-xs text-white/60">Total publicadas</div>
               <div className="text-lg font-bold text-white">{files.length}</div>
             </div>
+
             <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
               <div className="text-xs text-white/60">Mostrando</div>
               <div className="text-lg font-bold text-white">
@@ -153,19 +157,18 @@ export default function ApostilasPage() {
         </div>
       </section>
 
-      <div className="h-3 bg-[#4fa3ff]" />
+      <div className="h-2 w-full bg-[#4fa3ff]" />
 
-      {/* CONTEÚDO */}
-      <section className="bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="text-sm font-semibold tracking-wider text-[#0b1220]/60 uppercase">
+      <section className="flex-1 bg-white">
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="text-sm font-semibold uppercase tracking-wider text-[#0b1220]/60">
             Biblioteca
           </div>
-          <h2 className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-[#0b1220]">
+
+          <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-[#0b1220] md:text-3xl">
             Materiais disponíveis
           </h2>
 
-          {/* ✅ AQUI o componente é usado */}
           <div className="mt-6">
             <ApostilasFilters
               query={query}
@@ -177,7 +180,23 @@ export default function ApostilasPage() {
             />
           </div>
 
-          {loading && <div className="mt-8">Carregando...</div>}
+          {loading && (
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm"
+                >
+                  <div className="h-5 w-2/3 animate-pulse rounded bg-black/10" />
+                  <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-black/10" />
+                  <div className="mt-2 h-4 w-1/3 animate-pulse rounded bg-black/10" />
+                  <div className="mt-5 h-4 w-full animate-pulse rounded bg-black/10" />
+                  <div className="mt-2 h-4 w-5/6 animate-pulse rounded bg-black/10" />
+                  <div className="mt-7 h-11 w-full animate-pulse rounded-xl bg-black/10" />
+                </div>
+              ))}
+            </div>
+          )}
 
           {!loading && error && (
             <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
@@ -198,23 +217,22 @@ export default function ApostilasPage() {
           )}
 
           {!loading && !error && shownFiles.length > 0 && (
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {shownFiles.map((f) => {
                 const busy = downloadingId === f.id;
 
                 return (
                   <div
                     key={f.id}
-                    className="group rounded-2xl border border-black/10 bg-white p-6 shadow-sm transition
-                               hover:-translate-y-0.5 hover:shadow-lg"
+                    className="group flex h-full flex-col rounded-2xl border border-black/10 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
                   >
                     <div className="min-w-0">
-                      <div className="font-extrabold text-[#0b1220] truncate">
+                      <div className="line-clamp-2 text-lg font-extrabold tracking-tight text-[#0b1220]">
                         {getTitle(f)}
                       </div>
 
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#0b1220]/60">
-                        <span className="rounded-full black px-2 py-1 font-bold">
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#0b1220]/60">
+                        <span className="rounded-full bg-[#0b1220]/5 px-2.5 py-1 font-bold text-[#0b1220]">
                           {subjectLabel(f.subject)}
                         </span>
                         <span>{formatMB(f.size_bytes)}</span>
@@ -223,24 +241,23 @@ export default function ApostilasPage() {
                       </div>
 
                       {f.description && (
-                        <div className="mt-3 text-sm text-[#0b1220]/75 line-clamp-3">
+                        <div className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#0b1220]/75">
                           {f.description}
                         </div>
                       )}
                     </div>
 
-                    <div className="mt-6">
+                    <div className="mt-auto pt-6">
                       <button
                         onClick={() => download(f)}
                         disabled={busy}
-                        className="w-full rounded-xl bg-[#0b1220] text-white font-bold px-4 py-3 transition
-                                   hover:opacity-90 disabled:opacity-60 hover:cursor-pointer"
+                        className="w-full rounded-xl bg-[#0b1220] px-4 py-3 font-bold text-white transition hover:cursor-pointer hover:opacity-90 disabled:opacity-60"
                       >
                         {busy ? "Gerando link..." : "Baixar"}
                       </button>
-                    </div>
 
-                    <div className="pointer-events-none mt-5 h-0.5 w-0 bg-orange-400 transition-all duration-500 group-hover:w-full" />
+                      <div className="pointer-events-none mt-5 h-0.5 w-0 bg-orange-400 transition-all duration-500 group-hover:w-full" />
+                    </div>
                   </div>
                 );
               })}
@@ -249,7 +266,7 @@ export default function ApostilasPage() {
         </div>
       </section>
 
-      <div className="h-2 bg-orange-400" />
+      <div className="h-2 w-full bg-orange-400" />
     </div>
   );
 }

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Roboto } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import { TopBar } from "@/src/components/header";
 import { Footer } from "@/src/components/footer";
 
 const geistSans = Roboto({
-  weight: '400',
-  subsets: ['latin'],
+  weight: "400",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -22,17 +22,14 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${geistSans.className} antialiased`}
+        id="topo"
+        className={`${geistSans.className} min-h-screen antialiased`}
       >
-        <header>
+        <div className="flex min-h-screen flex-col">
           <TopBar />
-        </header>
-
-        {children}
-
-        <footer >
-            <Footer/>
-        </footer>
+          <main className="flex flex-1 flex-col">{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   );

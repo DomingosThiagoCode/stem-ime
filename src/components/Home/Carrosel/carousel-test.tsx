@@ -1,11 +1,6 @@
 import React, { useMemo } from "react";
 import styles from "./container-test.module.css";
 
-type Img = {
-  src: string;
-  alt?: string;
-};
-
 type Info = {
   title: string;
   src: string;
@@ -42,8 +37,6 @@ export default function InfiniteImageSlider({
   edgeFade = true,
 }: Props) {
   const safe = infos ?? [];
-
-  // Duplicar para loop perfeito (2 “pistas” iguais)
   const doubled = useMemo(() => [...safe, ...safe], [safe]);
 
   if (safe.length === 0) return null;
@@ -57,21 +50,37 @@ export default function InfiniteImageSlider({
       ].join(" ")}
       style={
         {
-          ["--itemW" as any]: `${itemWidth}px`,
-          ["--itemH" as any]: `${itemHeight}px`,
-          ["--gap" as any]: `${gap}px`,
-          ["--duration" as any]: `${durationSec}s`,
-          ["--dir" as any]: direction === "left" ? 1 : -1,
+          ["--itemW" as string]: `${itemWidth}px`,
+          ["--itemH" as string]: `${itemHeight}px`,
+          ["--gap" as string]: `${gap}px`,
+          ["--duration" as string]: `${durationSec}s`,
+          ["--dir" as string]: direction === "left" ? 1 : -1,
         } as React.CSSProperties
       }
     >
-      <div className={styles.track} aria-label="Infinite image slider">
+      <div className={styles.track} aria-label="Slider infinito de diretorias">
         {doubled.map((info, i) => (
-          <div className={styles.item} key={`${info.src}-${i}`}>
-            <img className={styles.img} src={info.src} alt={info.alt ?? ""} />
-            <div className="text-amber-50 font-bold text-center mt-2">{info.title}</div>
-            <div className="text-amber-50 font-normal4 text-sm mt-2 p-4 text-justify">{info.content}</div>
-          </div>
+          <article className={styles.item} key={`${info.src}-${i}`}>
+            <div className="relative w-full overflow-hidden rounded-t-[1.25rem]">
+              <img
+                className={styles.img}
+                src={info.src}
+                alt={info.alt ?? info.title}
+                loading="lazy"
+                draggable={false}
+              />
+            </div>
+
+            <div className="flex flex-1 flex-col px-4 pb-5 pt-3 sm:px-5">
+              <h3 className="text-center text-sm font-bold tracking-wide text-amber-50 sm:text-base">
+                {info.title}
+              </h3>
+
+              <p className="mt-3 text-justify text-sm leading-relaxed text-amber-50/95">
+                {info.content}
+              </p>
+            </div>
+          </article>
         ))}
       </div>
     </div>
