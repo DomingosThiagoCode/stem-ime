@@ -1,8 +1,8 @@
 import ComponentCarousel from "./Home/Carrosel/carousel";
-
 import { Birthstone } from "next/font/google";
 import InfiniteImageSlider from "./Home/Carrosel/carousel-test";
 import FeaturedPosts from "@/src/components/Home/FeaturedPosts";
+
 const birthstone = Birthstone({
   weight: "400",
   subsets: ["latin"],
@@ -10,14 +10,6 @@ const birthstone = Birthstone({
 });
 
 const Index = () => {
-  const listaImagens = [
-    { src: "/images/desenvolvimento.png", alt: "Desenvolvimento" },
-    { src: "/images/financeiro.png", alt: "Financeiro" },
-    { src: "/images/marketing.png", alt: "Marketing" },
-    { src: "/images/oficinas.png", alt: "Oficinas" },
-    { src: "/images/scm.png", alt: "SCM" },
-  ];
-
   const listaInfos = [
     {
       title: "DESENVOLVIMENTO INTERNO",
@@ -59,26 +51,26 @@ const Index = () => {
   return (
     <div className="flex w-full flex-col items-center justify-center overflow-x-hidden">
       {/* Apresentação */}
-      <div
-        className="flex w-full flex-col items-center gap-10"
+      <section
+        className="flex w-full flex-col items-center gap-8 overflow-hidden px-4 pb-0 pt-4 sm:gap-10 sm:px-6 lg:px-8"
         style={{
           backgroundSize: "cover",
+          backgroundPosition: "center",
           backgroundImage: "url(/oficial-background.jpeg)",
         }}
       >
         <div
-          className={`${birthstone.className} mt-2 px-4 text-center italic leading-none
-          text-[80px] sm:text-[120px] md:text-[160px] lg:text-[200px]`}
+          className={`${birthstone.className} mt-2 text-center italic leading-none text-[clamp(4rem,14vw,12.5rem)]`}
         >
           girls to girls
         </div>
 
-        <div className="flex flex-col items-center px-6 text-center text-base italic">
+        <div className="max-w-3xl px-2 text-center text-sm italic sm:text-base">
           “Não há limites para o que nós, como mulheres, podemos realizar”
           <p className="mt-2">Michelle Obama</p>
         </div>
 
-        <div className="w-full max-w-3xl px-6 text-center text-xs opacity-45">
+        <div className="w-full max-w-3xl px-2 text-center text-sm opacity-45 sm:text-xs">
           Somos uma Iniciativa Estudantil do Instituto Militar de Engenharia
           (IME) que objetiva estimular a participação feminina nas carreiras das
           áreas de ciências, tecnologia, engenharia e matemática (STEM) e,
@@ -87,41 +79,39 @@ const Index = () => {
         </div>
 
         <div className="h-2 w-full bg-blue-400" />
-      </div>
+      </section>
 
       {/* Postagens em Destaque */}
-      <div className="flex w-full flex-col items-center gap-6 bg-white px-6 py-12">
-        <div className="mt-2 text-center text-5xl font-bold text-gray-700">
+      <section className="flex w-full flex-col items-center gap-6 bg-white px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mt-2 text-center text-3xl font-bold text-gray-700 sm:text-4xl lg:text-5xl">
           POSTAGENS EM DESTAQUE
         </div>
 
-        {/* antes: flex-row que podia estourar */}
-        <div className="grid w-full max-w-6xl grid-cols-1 gap-10 md:grid-cols-3">
+        <div className="grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-3 lg:gap-10">
           <FeaturedPosts limit={3} />
         </div>
-      </div>
+      </section>
 
       {/* Quem Somos */}
-      <div
+      <section
         id="quem-somos"
-        className="flex w-full flex-col py-6 items-center gap-6 bg-radial-[at_50%_95%] from-blue-800 via-black/15 to-orange-900"
+        className="relative flex w-full flex-col items-center gap-6 overflow-hidden bg-radial-[at_50%_95%] from-blue-800 via-black/15 to-orange-900 px-4 py-8 sm:px-6 lg:px-8"
       >
-        <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-[#4fa3ff]/15 blur-3xl transition group-hover:bg-[#4fa3ff]/25" />
-        {/* <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-orange-400 transition-all duration-500 group-hover:w-full" /> */}
-        <div className="w-full py-2 max-w-6xl">
-          <div className="mb-6 w-full  text-5xl text-center font-bold">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-[#4fa3ff]/15 blur-3xl transition group-hover:bg-[#4fa3ff]/25" />
+
+        <div className="w-full max-w-6xl py-2">
+          <div className="mb-6 w-full text-center text-3xl font-bold sm:text-4xl lg:text-5xl">
             QUEM SOMOS?
           </div>
 
-          <div className="w-full text-justify font-mono">
-            {/* Bloco 2019: Origem */}
-            <div className="flex flex-row gap-8  p-6">
-              <div className="flex flex-col gap-8">
+          <div className="w-full font-mono text-justify">
+            <div className="flex flex-col gap-8 rounded-2xl p-2 sm:p-4 lg:flex-row lg:items-start lg:gap-10 lg:p-6">
+              <div className="flex min-w-0 flex-1 flex-col gap-8">
                 <div>
-                  <h3 className="mb-6 text-4xl font-bold">
+                  <h3 className="mb-4 text-2xl font-bold sm:mb-6 sm:text-3xl lg:text-4xl">
                     NOSSA ORIGEM (2019)
                   </h3>
-                  <p className="leading-relaxed">
+                  <p className="text-sm leading-relaxed sm:text-base">
                     Fundado em 2019, o STEM IME nasceu da troca de conhecimentos
                     com a iniciativa STEM2D (ITA). Em nosso primeiro ano,
                     impactamos 30 jovens de escolas públicas do Rio de Janeiro
@@ -131,10 +121,10 @@ const Index = () => {
                 </div>
 
                 <div>
-                  <h3 className="mb-6 text-3xl font-bold">
+                  <h3 className="mb-4 text-2xl font-bold sm:mb-6 sm:text-3xl">
                     RECONHECEMENTO NACIONAL (2020)
                   </h3>
-                  <p className="leading-relaxed">
+                  <p className="text-sm leading-relaxed sm:text-base">
                     Com uma nova estrutura organizacional, fomos destaque no I
                     Simpósio Brasileiro Mulheres em STEM no ITA. Nosso projeto
                     foi selecionado entre os 32 melhores do país (de 182
@@ -144,23 +134,29 @@ const Index = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex w-400 h-40 p-4 pt-50 items-center justify-center">
-                <img
-                  className="w-full h-40 rounded-xl object-cover "
-                  src="images/logo-stem.png"
-                  alt="Atividades STEM IME 2019"
-                />
+
+              <div className="flex w-full justify-center lg:w-100 lg:shrink-0">
+                <div className="w-full max-w-100 rounded-2xl p-2">
+                  <img
+                    className="h-auto max-h-112 w-full rounded-xl object-contain lg:object-cover"
+                    src="/images/logo-stem.png"
+                    alt="Atividades STEM IME 2019"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Diretoria */}
-      <div className="w-full bg-radial-[at_50%_15%] from-blue-800 via-black/15 to-orange-900 px-6 py-12 overflow-x-hidden">
-        <div className="mx-auto w-full max-w-9xl">
-          <div className="text-center text-5xl font-bold">DIRETORIAS</div>
-          <div className="mx-auto mt-10 w-full max-w-9xl overflow-hidden rounded-xl bg-transparent">
+      <section className="w-full overflow-x-hidden bg-radial-[at_50%_15%] from-blue-800 via-black/15 to-orange-900 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-400">
+          <div className="text-center text-3xl font-bold sm:text-4xl lg:text-5xl">
+            DIRETORIAS
+          </div>
+
+          <div className="mx-auto mt-10 w-full max-w-400 overflow-hidden rounded-xl bg-transparent">
             <InfiniteImageSlider
               infos={listaInfos}
               itemWidth={340}
@@ -173,18 +169,18 @@ const Index = () => {
             />
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Fotos em Destaque */}
-      <div className="flex w-full flex-col items-center gap-6 bg-white px-6 py-12 overflow-x-hidden">
-        <div className="text-center text-5xl font-bold text-gray-700">
+      <section className="flex w-full flex-col items-center gap-6 overflow-x-hidden bg-white px-4 py-12 sm:px-6 lg:px-8">
+        <div className="text-center text-3xl font-bold text-gray-700 sm:text-4xl lg:text-5xl">
           FOTOS EM DESTAQUE
         </div>
 
         <div className="w-full max-w-6xl">
           <ComponentCarousel />
         </div>
-      </div>
+      </section>
     </div>
   );
 };
