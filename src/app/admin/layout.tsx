@@ -17,32 +17,30 @@ export default function AdminLayout({
     let alive = true;
 
     async function guard() {
-      // 1) tem sessão?
       const { data } = await supabase.auth.getSession();
+
       if (!data.session) {
         router.replace("/");
-        router.refresh();
         return;
       }
 
-      // 2) é admin?
       const ok = await isCurrentUserAdmin();
+
       if (!ok) {
         router.replace("/login");
-        router.refresh();
         return;
       }
 
-      if (alive) setReady(true);
+      if (alive) {
+        setReady(true);
+      }
     }
 
     guard();
 
-    // ✅ se deslogar em qualquer lugar, expulsa do admin na hora
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         router.replace("/");
-        router.refresh();
       }
     });
 
@@ -54,7 +52,7 @@ export default function AdminLayout({
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-[#040607] text-white flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-[#040607] px-4 text-white">
         <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4">
           Verificando permissão...
         </div>
