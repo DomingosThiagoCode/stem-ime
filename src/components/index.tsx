@@ -13,42 +13,42 @@ const Index = () => {
   const listaInfos = [
     {
       title: "CRESCIMENTO INTERNO",
-      src: "/images/desenvolvimento.png",
+      src: "/images/4-removebg-preview.png",
       alt: "Desenvolvimento",
       content:
         "Responsável pelo desenvolvimento dos integrantes da equipe, promovendo treinamentos, capacitações e workshops voltados ao crescimento pessoal e profissional. Dentro dessa diretoria, existe o Impacta STEM, um núcleo dedicado a ampliar o impacto social da organização por meio de parcerias com ONGs, além da promoção de ações voltadas para a sociedade",
     },
     {
       title: "GESTÃO E FINANCEIRO",
-      src: "/images/financeiro.png",
+      src: "/images/5-removebg-preview.png",
       alt: "Financeiro",
       content:
         "Responsável pela organização interna da STEM, da gestão de recursos e do controle orçamentário. Também é responsável por estruturar processos seletivos e organizar imersões, garantindo o bom funcionamento da equipe.",
     },
     {
       title: "MARKETING",
-      src: "/images/marketing.png",
+      src: "/images/6-removebg-preview.png",
       alt: "Marketing",
       content:
         " Responsável pela comunicação da STEM, incluindo redes sociais como Instagram e LinkedIn, identidade visual e divulgação das ações e projetos, ampliando o alcance e a visibilidade da iniciativa.",
     },
     {
       title: "OFICINAS",
-      src: "/images/oficinas.png",
+      src: "/images/1-removebg-preview.png",
       alt: "Oficinas",
       content:
         "Planeja e executa atividades educacionais, principalmente voltadas para escolas e projetos sociais, como as Oficinas Científicas e as mentorias online para garotas de todo o Brasil, que são alguns dos principais meios de impacto da STEM.",
     },
     {
       title: "SISTEMA COLÉGIO MILITAR",
-      src: "/images/scm.png",
+      src: "/images/2-removebg-preview (1).png",
       alt: "SCM",
       content:
         "Atua na relação com o Sistema Colégio Militar, ampliando o alcance da STEM e apoiando projetos como a feira de ciências do Colégio Militar do Rio de Janeiro.",
     },
     {
       title: "EDUCA STEM",
-      src: "/images/educa.png",
+      src: "/images/3-removebg-preview.png",
       alt: "EDUCA",
       content:
         " Tem como foco a atuação direta na educação, organizando o envio de alunos voluntários para um colégio parceiro, onde são realizadas aulas de reforço e tiragem de dúvidas, contribuindo diretamente para o aprendizado dos estudantes. O setor de Apostilas é subordinado ao Educa STEM, sendo a parte responsável pelo desenvolvimento de materiais didáticos, como apostilas de matemática, física e química, que serão disponibilizadas gratuitamente para estudantes de todo o Brasil, ampliando o alcance educacional da iniciativa.",
