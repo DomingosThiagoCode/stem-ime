@@ -62,17 +62,15 @@ const TopBar = () => {
 
   return (
     <div
-      className="relative z-30 w-full"
+      className="fixed top-0 left-0 z-50 w-full"
       style={{
         backgroundImage: "url(/oficial-background.jpg)",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
-        
       }}
     >
       <div className="absolute inset-0 bg-linear-to-r from-[#040607]/25 via-[#040607]/65 to-[#040607]/25" />
-      
 
       <div className="relative mx-auto flex h-20 w-full max-w-400 items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
         <Link
@@ -103,8 +101,7 @@ const TopBar = () => {
           {!loadingSession && !isLogged && (
             <Link
               href="/login"
-              className="shrink-0 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black transition 
-              hover:opacity-90"
+              className="shrink-0 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black transition hover:opacity-90"
             >
               Entrar
             </Link>
@@ -114,18 +111,14 @@ const TopBar = () => {
             <div className="flex shrink-0 items-center gap-3">
               <Link
                 href="/admin"
-                className=" text-black rounded-lg border border-white/20 bg-orange-500 px-4 py-2 text-sm font-semibold transition
-                  hover:bg-white hover:scale-105
-                 hover:border-white/35"
+                className="text-black rounded-lg border border-white/20 bg-orange-500 px-4 py-2 text-sm font-semibold transition hover:bg-white hover:scale-105 hover:border-white/35"
               >
                 Painel
               </Link>
 
               <button
                 onClick={handleLogout}
-                className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black transition 
-                hover:bg-orange-500 hover:text-black hover:scale-105
-                hover:cursor-pointer hover:opacity-90"
+                className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-orange-500 hover:text-black hover:scale-105 hover:cursor-pointer hover:opacity-90"
               >
                 Sair
               </button>
@@ -175,12 +168,8 @@ const TopBar = () => {
             id="mobile-menu"
             className="absolute left-0 right-0 top-full z-30 border-t border-white/10 bg-linear-to-b from-black/95 to-black/75 backdrop-blur-md"
           >
-            <div className=" mx-auto flex w-full max-w-400 flex-col gap-2 px-4 py-4 sm:px-6"
-              
-            >
-            {/* <div className="absolute inset-0 bg-linear-to-b from-[#040607]/35 to-[#030607]/65" /> */}
-
-              <nav className=" flex flex-col">
+            <div className="mx-auto flex w-full max-w-400 flex-col gap-2 px-4 py-4 sm:px-6">
+              <nav className="flex flex-col">
                 {abas.map((aba) => (
                   <Link
                     key={aba.label}
@@ -192,7 +181,7 @@ const TopBar = () => {
                 ))}
               </nav>
 
-              <div className=" mt-2 flex flex-col gap-3 border-t border-white/10 pt-4">
+              <div className="mt-2 flex flex-col gap-3 border-t border-white/10 pt-4">
                 {!loadingSession && !isLogged && (
                   <Link
                     href="/login"

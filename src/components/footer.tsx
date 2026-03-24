@@ -5,13 +5,13 @@ import { RiInstagramLine } from "react-icons/ri";
 import { FaArrowUpLong } from "react-icons/fa6";
 
 const Footer = () => {
-  const startYear = "2010";
+  const startYear = "2019";
   const company = "STEM";
   const currentYear = new Date().getFullYear();
 
   return (
     <footer
-    id="contato"
+      id="contato"
       className="relative mt-6 w-full overflow-x-hidden bg-[#040607] text-gray-300"
       style={{
         backgroundImage: "url('/oficial-background.jpg')",
@@ -20,7 +20,7 @@ const Footer = () => {
         backgroundSize: "cover",
       }}
     >
-        <div className="absolute inset-0 bg-linear-to-r from-[#040607]/65 via-[#040607]/25 to-[#040607]/75" />
+      <div className="absolute inset-0 bg-linear-to-r from-[#040607]/65 via-[#040607]/25 to-[#040607]/75" />
 
       <div className="relative mx-auto w-full max-w-7xl px-6 py-10">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center lg:grid-cols-3 ">
@@ -37,18 +37,8 @@ const Footer = () => {
                 Apostilas
               </Link>
 
-              <Link
-                href="/blog"
-                className="transition-colors hover:text-white"
-              >
+              <Link href="/blog" className="transition-colors hover:text-white">
                 Postagens
-              </Link>
-
-              <Link
-                href="/#contato"
-                className="transition-colors hover:text-white"
-              >
-                Ajuda
               </Link>
             </div>
 
